@@ -1,0 +1,5 @@
+---
+ansible_python_interpreter: '/usr/bin/python3'
+ansible_ssh_common_args: '\
+  -J user@double.bastion.fqdn:22222 \
+  -o StrictHostKeyChecking=no'

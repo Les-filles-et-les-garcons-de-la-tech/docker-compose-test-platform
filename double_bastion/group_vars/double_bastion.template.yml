@@ -1,0 +1,3 @@
+ansible_ssh_common_args: '\
+  -J user@double.bastion.fqdn:22222,usr1@192.168.8.174 \
+  -o StrictHostKeyChecking=no'

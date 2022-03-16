@@ -1,0 +1,208 @@
+---
+- hosts: sources:!evicted
+  gather_facts: false
+  tasks:
+    - name: 'Force trust hosts when using multiple bastions'
+      ping:
+      delegate_to: "{{ item }}"
+      run_once: true
+      loop: "{{ groups['bastion'] }}"
+      when: groups['bastion'] | length > 1
+
+- hosts: sources:!evicted
+  tasks:
+    - name: Secure hour format input
+      set_fact:
+        filter_hour_formatted: "\\d\\d"
+        tmp_path: "{{ tmp_root + '/' + (inventory_hostname | regex_replace('_(src|dst)$', '')) }}"
+      when: filter_hour is not defined or filter_hour is not regex("^[0-9]+$")
+    - name: Secure hour format input
+      set_fact:
+        filter_hour_formatted: "{{ '%02d' | format(filter_hour | int) }}"
+        tmp_path: "{{ tmp_root + '/' + (inventory_hostname | regex_replace('_(src|dst)$', '')) }}"
+        hourly_process: true
+      when: filter_hour is defined and filter_hour is regex("^[0-9]+$")
+    - ping:
+
+- hosts: type1:&sources:!evicted
+  pre_tasks:
+    - name: Setup provider1 filters Techno1
+      block:
+      - name: Setup provider1 filter on files techno1 to deploy
+        set_fact:
+          filter: ".*dataresult_{{ item }}_60_{{ filter_day }}{{ filter_hour_formatted }}.*\\.csv"
+        loop: "{{ setids }}"
+        register: tmp_filters
+      - set_fact:
+          filters: "{{ tmp_filters.results | map(attribute='ansible_facts.filter') | list }}"
+          filename_rename_regex: "(.*dataresult_.*_60_.*{{ filter_day }}{{ filter_hour_formatted }}.*)_[^_]*(\\.csv)"
+          filename_replace_regex: "\\1\\2"
+        when: tmp_filters is defined
+      when: setids is defined and inventory_hostname in groups['type1_provider1_techno1']
+
+    - name: Setup provider1 filters Techno2
+      block:
+      - name: Setup provider1 filter on files techno2 to deploy
+        set_fact:
+          filter: ".*dataresult_{{ item }}_30_{{ filter_day }}{{ filter_hour_formatted }}.*\\.csv"
+        loop: "{{ setids }}"
+        register: tmp_filters
+      - set_fact:
+          filters: "{{ tmp_filters.results | map(attribute='ansible_facts.filter') | list }}"
+          filename_rename_regex: "(.*dataresult_.*_30_.*{{ filter_day }}{{ filter_hour_formatted }}.*)_[^_]*(\\.csv)"
+          filename_replace_regex: "\\1\\2"
+        when: tmp_filters is defined
+      when: setids is defined and inventory_hostname in groups['type1_provider1_techno2']
+
+    - name: Setup provider2 techno1 filters
+      set_fact:
+        filters: ".*\\bC{{ filter_day }}\\.{{ filter_hour_formatted }}.*_Context=.*_stats\\.txt"
+        filename_rename_regex: ".*\\b(C{{ filter_day }}\\.{{ filter_hour_formatted }}.*)_.*Element=(\\w+\\d*:\\d{4}).*"
+        filename_replace_regex: "\\1_\\2"
+      when: inventory_hostname in groups['type1_provider2_techno1']
+
+    - name: Setup provider2 techno2 filters
+      block:
+      - set_fact:
+          filters: ".*\\bA{{ filter_day }}\\.{{ filter_hour_formatted }}.*Context=.*_stats\\.xml\\.gz"
+      when: inventory_hostname in groups['type1_provider2_techno2']
+
+  roles:
+    - role: gather_data_files
+      vars:
+        gather_source_path: "{{ source_path }}"
+        gather_filters: "{{ filters }}"
+    - role: format_data_filenames
+      vars:
+        dst_path: "{{ tmp_path }}"
+        file_list: "{{ filtered_files.files | list }}"
+    - role: copy_data_files
+      vars:
+        copy_dst_path: "{{ tmp_path }}"
+        files_to_copy: "{{ filtered_paths }}"
+        script_path: "{{ tmp_root }}"
+        copy_script_name: "{{ tmp_script_name }}"
+    - role: archive
+      vars:
+        paths: "{{ filtered_paths | map(attribute='dst') | list }}"
+
+- hosts: type2:&sources:!evicted
+  pre_tasks:
+    - name: Setup provider1 filters
+      block:
+      - name: Setup provider1 file filters
+        set_fact:
+          filters: ".*\\bA{{ filter_day }}\\.{{ filter_hour_formatted }}.*\\.xml\\.gz"
+          filename_rename_regex: ".*\\b(A{{ filter_day }}\\.{{ filter_hour_formatted }}.*)(\\.xml)"
+      - name: Setup techno1 rename
+        set_fact:
+          filename_replace_regex: "\\1XXX\\2"
+        when: inventory_hostname is search("_techno1$")
+      - name: Setup techno2 rename
+        set_fact:
+          filename_replace_regex: "\\1YYY\\2"
+        when: inventory_hostname is search("_techno2$")
+      when: inventory_hostname is match("type2_provider1_.*")
+
+    - name: Setup provider2 techno1 filters
+      set_fact:
+        filters: ".*\\bC{{ filter_day }}\\.{{ filter_hour_formatted }}.*\\d{4}"
+      when: inventory_hostname in groups['type2_provider2_techno1']
+
+    - name: Setup provider2 techno2 filters
+      block:
+      - set_fact:
+          filters: ".*\\bA{{ filter_day }}\\.{{ filter_hour_formatted }}.*_Context=.*_stats\\.xml"
+      when: inventory_hostname in groups['type2_provider2_techno2']
+
+  roles:
+    - role: gather_data_files
+      vars:
+        gather_source_path: "{{ source_path }}"
+        gather_filters: "{{ filters }}"
+    - role: format_data_filenames
+      vars:
+        dst_path: "{{ tmp_path }}"
+        file_list: "{{ filtered_files.files | list }}"
+    - role: copy_data_files
+      vars:
+        copy_dst_path: "{{ tmp_path }}"
+        files_to_copy: "{{ filtered_paths }}"
+        script_path: "{{ tmp_root }}"
+        copy_script_name: "{{ tmp_script_name }}"
+    - role: archive
+      vars:
+        paths: "{{ filtered_paths | map(attribute='dst') | list }}"
+
+- hosts: type3:&sources:!evicted
+  pre_tasks:
+    - name: Setup provider1 filters Techno1
+      block:
+      - name: Setup provider1 filter on files techno1 to deploy
+        set_fact:
+          filter: ".*dataresult_{{ item }}_60_{{ filter_day }}{{ filter_hour_formatted }}.*\\.csv"
+        loop: "{{ setids }}"
+        register: tmp_filters
+      - set_fact:
+          filters: "{{ tmp_filters.results | map(attribute='ansible_facts.filter') | list }}"
+        when: tmp_filters is defined
+      when: setids is defined and inventory_hostname is match('type3_provider1_techno1')
+
+    - name: Setup provider1 filters Techno2
+      block:
+      - name: Setup provider1 filter on files techno2 to deploy
+        set_fact:
+          filter: ".*dataresult_{{ item }}_30_{{ filter_day }}{{ filter_hour_formatted }}.*\\.csv"
+        loop: "{{ setids }}"
+        register: tmp_filters
+      - set_fact:
+          filters: "{{ tmp_filters.results | map(attribute='ansible_facts.filter') | list }}"
+        when: tmp_filters is defined
+      when: setids is defined and inventory_hostname is match('type3_provider1_techno2')
+
+  roles:
+    - role: gather_data_files
+      vars:
+        gather_source_path: "{{ source_path }}"
+        gather_filters: "{{ filters }}"
+    - role: format_data_filenames
+      vars:
+        dst_path: "{{ tmp_path }}"
+        file_list: "{{ filtered_files.files | list }}"
+    - role: copy_data_files
+      vars:
+        copy_dst_path: "{{ tmp_path }}"
+        files_to_copy: "{{ filtered_paths }}"
+        script_path: "{{ tmp_root }}"
+        copy_script_name: "{{ tmp_script_name }}"
+    - role: archive
+      vars:
+        paths: "{{ filtered_paths | map(attribute='dst') | list }}"
+
+- hosts: sources:!evicted
+  tasks:
+    - name: Show used filter
+      debug:
+        var: filters
+    - name: "Check destination files"
+      debug:
+        msg: "#{{ hostvars[inventory_hostname].filtered_paths|length }} source files have been gathered."
+      when: hostvars[inventory_hostname].filtered_paths is defined
+    - name: Print product archive size
+      debug:
+        msg: "'{{ hostvars[inventory_hostname].archive_name }}': {{ hostvars[inventory_hostname].archive_stats.stat.size | int | human_readable }}"
+      when: hostvars[inventory_hostname].archive_name is defined and hostvars[inventory_hostname].archive_stats.stat.size is defined
+
+    - name: "Non Regression"
+      block:
+      - name: "Test destination files for hourly process"
+        debug:
+          msg: "Ansible should have found {{ expected_hourly_files }} files: {{ hostvars[inventory_hostname].filtered_paths|length }}"
+        when: hourly_process is defined and expected_hourly_files is defined
+        failed_when: expected_hourly_files != ( hostvars[inventory_hostname].filtered_paths | length )
+      - name: "Test destination files for daily process"
+        debug:
+          msg: "Ansible should have found {{ expected_daily_files }} files: {{ hostvars[inventory_hostname].filtered_paths|length }}"
+        when: (hourly_process is not defined or not hourly_process) and expected_daily_files is defined
+        failed_when: expected_daily_files != ( hostvars[inventory_hostname].filtered_paths | length )
+      when: test_mode is defined

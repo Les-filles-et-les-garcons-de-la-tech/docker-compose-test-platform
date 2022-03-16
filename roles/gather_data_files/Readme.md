@@ -4,7 +4,7 @@ It will, according to the filter day *filter_day* & path *gather_filters*.
 ## Inputs
 |Variable Name|Description|Example|
 |---|---|---|
-|gather_source_path|Source path from where the files will be copied.|/ftp/arpt/DATA|
+|gather_source_path|Source path from where the files will be copied.|/ftp/regusr/DATA|
 |gather_filters|Regex Fitechno2r to apply to source files to narrow the copy to the relevant ones.|".*A[\\d\\.-]+\_BSC\\d+\_[^\\.]+\\.xml"|
 |exclude_filters|Regex filter for files to exclude.|".*MSC.*"|
 

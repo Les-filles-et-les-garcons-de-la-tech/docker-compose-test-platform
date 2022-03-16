@@ -1,0 +1,8 @@
+---
+source_path: "/ftp/client/TYPE1/PRV2TECHNO2/"
+dst_path: /home/client_provider2_techno2_type1/flat_file
+tmp_root: /ftp/client/TYPE1/PRV2TECHNO2/flat_file
+prv2_techno2_filter:
+  - RLOUVJA
+expected_hourly_files: 4
+expected_daily_files: 96

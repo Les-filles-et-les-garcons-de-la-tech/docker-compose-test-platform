@@ -1,0 +1,9 @@
+---
+source_path: "/ftp/client/type3/PRV1TECHNO2/"
+dst_path: /home/client_provider1_techno2/flat_file
+tmp_root: /ftp/client/type3/PRV1TECHNO2/flat_file
+setids:
+  - 338111
+  - 210264
+expected_hourly_files: 2
+expected_daily_files: 48

@@ -79,7 +79,7 @@ build_images:
     - docker compose build
   parallel:
     matrix:
-      - SERVER: ["simple_bastion"]
+      - SERVER: [simple_bastion, double_bastion]
 
 package:
   image: ubuntu:20.04
@@ -126,4 +126,4 @@ test_server:
   parallel:
     matrix:
       - PROCESS_HOUR: [00, 10]
-        SERVER: ["simple_bastion"]
+        SERVER: [simple_bastion, double_bastion]

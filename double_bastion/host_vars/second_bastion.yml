@@ -1,0 +1,6 @@
+---
+ansible_user: usr1
+ansible_ssh_port: 22
+ansible_ssh_common_args: '\
+  -J user@first_bastion:22222 \
+  -o StrictHostKeyChecking=no'

@@ -1,0 +1,6 @@
+---
+ansible_ssh_common_args: '\
+  -J user@first_bastion:22222,usr1@second_bastion \
+  -o StrictHostKeyChecking=no'
+expected_hourly_files: 1
+expected_daily_files: 24

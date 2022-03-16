@@ -1,0 +1,6 @@
+---
+source_path: "/ftp/client/type3/PRV1TECHNO1/"
+dst_path: /home/client_provider1_techno1/flat_file
+tmp_root: /ftp/client/type3/PRV1TECHNO1/flat_file
+setids:
+  - 210264

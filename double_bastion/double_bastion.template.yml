@@ -1,0 +1,71 @@
+---
+all:
+  children:
+    double_bastion:
+      children:
+        bastion:
+          hosts:
+            first_bastion:
+              ansible_host: double.bastion.fqdn
+            second_bastion:
+              ansible_host: 192.168.8.174
+        type1_provider1_techno1:
+          hosts:
+            type1_provider1_techno1_src:
+              ansible_host: 192.168.101.250
+            type1_provider1_techno1_dst:
+              ansible_host: 192.168.8.166
+        type1_provider1_techno2:
+          hosts:
+            type1_provider1_techno2_src:
+              ansible_host: 192.168.101.250
+            type1_provider1_techno2_dst:
+              ansible_host: 192.168.8.168
+        type1_provider2_techno1:
+          hosts:
+            type1_provider2_techno1_src:
+              ansible_host: 192.168.101.250
+            type1_provider2_techno1_dst:
+              ansible_host: 192.168.8.166
+        type1_provider2_techno2:
+          hosts:
+            type1_provider2_techno2_src:
+              ansible_host: 192.168.101.250
+            type1_provider2_techno2_dst:
+              ansible_host: 192.168.8.168
+        type2_provider2_techno1:
+          hosts:
+            type2_provider2_techno1_src:
+              ansible_host: 192.168.101.242
+            type2_provider2_techno1_dst:
+              ansible_host: 192.168.8.170
+        type2_provider2_techno2:
+          hosts:
+            type2_provider2_techno2_src:
+              ansible_host: 192.168.101.242
+            type2_provider2_techno2_dst:
+              ansible_host: 192.168.8.170
+        type2_provider1_techno1:
+          hosts:
+            type2_provider1_techno1_src:
+              ansible_host: 192.168.101.242
+            type2_provider1_techno1_dst:
+              ansible_host: 192.168.8.171
+        type2_provider1_techno2:
+          hosts:
+            type2_provider1_techno2_src:
+              ansible_host: 192.168.101.242
+            type2_provider1_techno2_dst:
+              ansible_host: 192.168.8.171
+        type3_provider1_techno1:
+          hosts:
+            type3_provider1_techno1_src:
+              ansible_host: 192.168.101.234
+            type3_provider1_techno1_dst:
+              ansible_host: 192.168.8.173
+        type3_provider1_techno2:
+          hosts:
+            type3_provider1_techno2_src:
+              ansible_host: 192.168.101.234
+            type3_provider1_techno2_dst:
+              ansible_host: 192.168.8.173
