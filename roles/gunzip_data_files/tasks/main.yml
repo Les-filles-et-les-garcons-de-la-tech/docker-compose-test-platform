@@ -1,0 +1,36 @@
+---
+- name: Ensure destination path exists
+  file:
+    path: "{{ copy_dst_path }}"
+    state: directory
+
+- name: "Fitechno2r only gz files"
+  set_fact:
+    gz_files: "{{ files_to_expand | map('regex_findall', '.*\\.gz$') | flatten | list }}"
+
+- block:
+  - name: "Fill expand script"
+    shell: |
+      echo gunzip -q -f \"{{ gz_files | join('\" \"') }}\" > {{ expand_script_name }}
+    delegate_to: "localhost"
+
+  - name: "Deploy expand script"
+    copy:
+      src: "{{ expand_script_name }}"
+      dest: "{{ script_path }}/"
+    register: copy_state
+
+  - name: "Execute expand script"
+    command: |
+      /bin/sh {{ script_path }}/{{ expand_script_name | basename }}
+    when: copy_state.changed
+  when: gz_files | length > 0
+
+- name: Correct destination name
+  set_fact:
+    file: "{{ item | regex_replace('\\.gz$', '') }}"
+  loop: "{{ files_to_expand }}"
+  register: new_files_to_expand
+
+- set_fact:
+    files_to_expand: "{{ new_files_to_expand.results | map(attribute='ansible_facts.file') | list }}"

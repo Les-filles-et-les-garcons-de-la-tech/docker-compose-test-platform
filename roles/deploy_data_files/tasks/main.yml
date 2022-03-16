@@ -1,0 +1,53 @@
+---
+- name: "Setup variables"
+  set_fact:
+    archive_fullname: "{{ hostvars[inventory_hostname].archive_name }}"
+    src_hostname: "{{ inventory_hostname | regex_replace('_dst$', '_src') }}"
+    archive_filename: "{{ hostvars[inventory_hostname].archive_name | basename }}"
+
+- name: Ensure destination directory exists
+  file:
+    path: "{{ dst_path }}"
+    state: directory
+
+- block:
+  - name: Fetch DATA files archive on bastion from source
+    command: |
+        scp -o StrictHostKeyChecking=no -P {{ hostvars[src_hostname]['ansible_ssh_port'] | default(22) }} {{ hostvars[src_hostname].ansible_user }}@{{ hostvars[src_hostname]['ansible_host'] | default(src_hostname) }}:{{ archive_fullname }} /tmp/
+    args:
+      creates: "/tmp/{{ archive_filename }}"
+    delegate_to: "{{ groups['bastion'] | last }}"
+
+  - name: "Push DATA files archive"
+    command: |
+        scp -o StrictHostKeyChecking=no -P {{ hostvars[inventory_hostname]['ansible_ssh_port'] | default(22) }} /tmp/{{ archive_filename }} {{ hostvars[inventory_hostname].ansible_user }}@{{ hostvars[inventory_hostname]['ansible_host'] | default(inventory_hostname) }}:{{ dst_path }}/
+    delegate_to: "{{ groups['bastion'] | last }}"
+
+  always:
+    - name: "Clean archive on bastion"
+      file:
+        path: "/tmp/{{ archive_filename }}"
+        state: absent
+      delegate_to: "{{ groups['bastion'] | last }}"
+
+- block:
+  - name: Uncompress modified files
+    unarchive:
+      src: "{{ dst_path }}/{{ archive_filename }}"
+      remote_src: true
+      dest: "{{ dst_path }}"
+      owner: "{{ ansible_user }}"
+      mode: '755'
+
+  always:
+    - name: "Clean archive"
+      file:
+        path: "{{ dst_path }}/{{ archive_filename }}"
+        state: absent
+
+- name: Get copied files
+  find:
+    paths: "{{ dst_path }}"
+    recurse: false
+    file_type: file
+  register: dest_files

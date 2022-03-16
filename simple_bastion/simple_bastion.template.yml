@@ -1,0 +1,35 @@
+---
+all:
+  children:
+    simple_bastion:
+      children:
+        bastion:
+          hosts:
+            rpmqos:
+              ansible_host: client.bastion.fqdn
+              ansible_ssh_port: 22222
+        sources:
+          vars:
+            ansible_host: 192.168.100.21
+        app_servers:
+          hosts:
+            type1_provider1_techno1_dst:
+              ansible_host: 192.168.100.13
+            type1_provider2_techno1_dst:
+              ansible_host: 192.168.100.11
+            type1_provider2_techno2_dst:
+              ansible_host: 192.168.100.11
+            type1_provider2_techno3_dst:
+              ansible_host: 192.168.100.11
+            type2_provider1_techno1_dst:
+              ansible_host: 192.168.100.18
+            type2_provider1_techno2_dst:
+              ansible_host: 192.168.100.18
+            type2_provider1_techno3_dst:
+              ansible_host: 192.168.100.18
+            type2_provider2_techno1_dst:
+              ansible_host: 192.168.100.16
+            type2_provider2_techno2_dst:
+              ansible_host: 192.168.100.16
+            type2_provider2_techno3_dst:
+              ansible_host: 192.168.100.16

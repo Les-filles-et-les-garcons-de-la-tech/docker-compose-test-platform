@@ -1,0 +1,47 @@
+---
+- name: Ensure destination path exists
+  file:
+    path: "{{ copy_dst_path }}"
+    state: directory
+
+- name: "Clean copy script"
+  file:
+    path: "{{ copy_script_name }}"
+    state: absent
+  delegate_to: "localhost"
+
+- name: "Create copy script"
+  file:
+    path: "{{ copy_script_name }}"
+    state: touch
+    mode: '755'
+  delegate_to: "localhost"
+
+- name: "Fill copy script"
+  shell: |
+    echo cp -u \"{{ item.src }}\" \"{{ item.dst }}\" >> {{ copy_script_name }}
+    echo gunzip -q -f \"{{ item.dst }}\" >> {{ copy_script_name }}
+  loop: "{{ files_to_copy }}"
+  delegate_to: "localhost"
+
+- name: "Deploy copy script"
+  copy:
+    src: "{{ copy_script_name }}"
+    dest: "{{ script_path }}/"
+  register: copy_state
+
+- block:
+  - name: "Execute copy script"
+    command: |
+      /bin/sh {{ script_path }}/{{ copy_script_name | basename }}
+
+  - name: Correct destination name
+    set_fact:
+      src: "{{ item.src }}"
+      dst: "{{ item.dst | regex_replace('\\.gz$', '') }}"
+    loop: "{{ filtered_paths }}"
+    register: new_filtered_paths
+
+  - set_fact:
+      filtered_paths: "{{ new_filtered_paths.results | map(attribute='ansible_facts') | list }}"
+  when: copy_state.changed

@@ -1,0 +1,19 @@
+---
+- name: "Get month to rename"
+  set_fact:
+    dest_month: "{{ filtered_paths | map(attribute='dst') | map('regex_findall', '[_-]\\d{2}(\\w{3})\\d{4}_') | flatten | map('title') | list | unique }}"
+
+- name: Set destination file names
+  set_fact:
+    dest_filenames: "{{ filtered_paths | map(attribute='dst') | map('regex_replace', '([_-]\\d{2})(' + item + ')(\\d{4}_)', '\\1' + item + '\\3', ignorecase=True) | list }}"
+  loop: "{{ dest_month }}"
+
+- name: Correct destination name
+  set_fact:
+    src: "{{ item.0.src }}"
+    dst: "{{ item.1 }}"
+  loop: "{{ filtered_paths | list | zip(dest_filenames) | list }}"
+  register: new_filtered_paths
+
+- set_fact:
+    filtered_paths: "{{ new_filtered_paths.results | map(attribute='ansible_facts') | list }}"

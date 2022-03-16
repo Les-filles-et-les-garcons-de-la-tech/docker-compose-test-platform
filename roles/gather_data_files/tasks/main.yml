@@ -1,0 +1,18 @@
+---
+- name: "Get filtered files"
+  find:
+    paths: "{{ gather_source_path }}"
+    patterns: "{{ gather_filters }}"
+    excludes: "{{ exclude_filters | default(omit) }}"
+    recurse: false
+    file_type: file
+    use_regex: true
+    get_checksum: true
+  register: filtered_files
+  ignore_errors: true
+
+- name: Show used parameters when no files found
+  debug:
+    msg: "No file found in {{ gather_source_path }} using filters: {{ gather_filters }}"
+  failed_when: true
+  when: filtered_files.failed or filtered_files.files | list | length == 0

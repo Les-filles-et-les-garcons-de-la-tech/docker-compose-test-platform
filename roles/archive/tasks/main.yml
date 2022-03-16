@@ -1,0 +1,11 @@
+---
+- name: Compress modified files
+  archive:
+    path: "{{ paths }}"
+    dest: "{{ archive_name }}"
+    force_archive: true
+
+- name: Get stats of archive
+  stat:
+    path: "{{ archive_name }}"
+  register: archive_stats

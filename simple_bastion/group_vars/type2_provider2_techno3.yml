@@ -1,0 +1,6 @@
+---
+source_path: "/ftp/client/TYPE2/PRV2TECHNO3"
+dst_path: /home/type2_provider2_techno3/flat_file
+tmp_root: /ftp/client/TYPE2/PRV2TECHNO3/flat_file
+expected_hourly_files: 8
+expected_daily_files: 192

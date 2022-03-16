@@ -1,0 +1,21 @@
+---
+- name: Ensure destination path exists
+  file:
+    path: "{{ dst_path }}"
+    state: directory
+
+- name: Format destination name
+  set_fact:
+    filtered_path:
+      name: "{{ item.path | basename }}"
+      src: "{{ item.path }}"
+      dst: "{{ dst_path }}/{{
+                  item.path | basename | regex_replace(filename_rename_regex, filename_replace_regex)
+                 | quote  }}"
+      checksum: "{{ item.checksum }}"
+  loop: "{{ file_list }}"
+  register: filtered_paths_task
+
+- name: Export list of found files
+  set_fact:
+    filtered_paths: "{{ filtered_paths_task.results | map(attribute='ansible_facts.filtered_path') | list }}"

@@ -1,0 +1,8 @@
+---
+source_path: "/ftp/client/TYPE1/PRV1TECHNO1/{{ filter_day | regex_replace('^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)$', '\\3\\2\\1') }}"
+dst_path: /home/type1_provider1_techno1/flat_file
+tmp_root: /ftp/client/TYPE1/PRV1TECHNO1/flat_file
+setids:
+  - 127391470
+expected_hourly_files: 1
+expected_daily_files: 24

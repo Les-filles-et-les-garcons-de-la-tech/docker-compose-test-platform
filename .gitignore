@@ -1,0 +1,7 @@
+*.csv
+*.txt
+.vscode/
+*.patch
+*.log
+*.env
+id_rsa*

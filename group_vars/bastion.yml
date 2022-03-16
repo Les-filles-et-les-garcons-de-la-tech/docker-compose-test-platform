@@ -1,0 +1,4 @@
+---
+ansible_user: user
+ansible_ssh_port: 22222
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

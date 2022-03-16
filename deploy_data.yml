@@ -1,0 +1,29 @@
+---
+- hosts: app_servers:!evicted
+  gather_facts: false
+  tasks:
+    - name: 'Force trust hosts when using multple bastions'
+      ping:
+      delegate_to: "{{ item }}"
+      run_once: true
+      loop: "{{ groups['bastion'] }}"
+      when: groups['bastion'] | length > 1
+
+- hosts: app_servers:bastion:!evicted
+  tasks:
+    - ping:
+    - name: "Check hourly filter"
+      set_fact:
+        filter_hour: "\\d\\d"
+      when: filter_hour is not defined or filter_hour|int == false
+
+- hosts: app_servers:!evicted
+  roles:
+    - role: deploy_data_files
+
+- hosts: app_servers:!evicted
+  post_tasks:
+    - name: "Check destination files"
+      debug:
+        var: hostvars[inventory_hostname].dest_files.matched
+      when: hostvars[inventory_hostname].dest_files is defined and hostvars[inventory_hostname].dest_files.matched is defined

@@ -1,0 +1,6 @@
+---
+filter_day: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}"
+filter_hour: "{{ ansible_date_time.hour | int - 1 }}"
+tmp_root: "/tmp/"
+archive_name: "{{ tmp_root | regex_replace('/+$', '') }}/{{ inventory_hostname | regex_replace('_(src|dst)$', '') }}.{{ filter_day }}.{{ filter_hour }}.tgz"
+tmp_script_name: "/tmp/{{ inventory_hostname | regex_replace('_(src|dst)$', '') }}.{{ filter_day }}.{{ filter_hour }}.sh"

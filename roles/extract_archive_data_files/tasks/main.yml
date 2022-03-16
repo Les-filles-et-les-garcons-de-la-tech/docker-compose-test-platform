@@ -1,0 +1,34 @@
+---
+- name: Ensure destination path exists
+  file:
+    path: "{{ dst_path }}"
+    state: directory
+
+- name: "Get source files"
+  find:
+    paths: "{{ archive_source_path }}"
+    patterns: "{{ source_archive }}"
+    recurse: false
+    file_type: file
+    get_checksum: true
+    use_regex: true
+  register: source_archives
+  ignore_errors: true
+
+- name: Show used parameters when no files found
+  debug:
+    msg: "No file found in {{ archive_source_path }} using filters: {{ source_archive }}"
+  failed_when: true
+  when: source_archives.failed or source_archives.files | list | length == 0
+
+- name: Extract source archives
+  unarchive:
+    src: "{{ item.path }}"
+    dest: "{{ dst_path }}"
+    remote_src: true
+    list_files: true
+  loop: "{{ source_archives.files | list }}"
+  register: daily_files
+
+- set_fact:
+    filtered_paths: "{{ daily_files.results | map(attribute='files') | flatten | reject('equalto', './') | map('regex_replace', '^(\\./)?', dst_path + '/') | list }}"

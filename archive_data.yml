@@ -1,0 +1,40 @@
+---
+- hosts: sources:bastion:regulator
+  tasks:
+    - ping:
+
+- hosts: sources
+  vars:
+    daily_archive_fullname: "{{ archive_name | regex_replace('\\.[^\\.]*(\\.tgz)', '.d\\1') }}"
+    tmp_audit_archive_name: "/tmp/{{ audit_archive_name }}"
+    final_audit_archive_fullname: "{{ audit_target_path }}/{{ audit_archive_name }}"
+    src_host_port: "{{ hostvars[inventory_hostname]['ansible_ssh_port'] | default(22) }}"
+    src_hostname: "{{ hostvars[inventory_hostname]['ansible_host'] | default(inventory_hostname) }}"
+    regulator_host_port: "{{ hostvars['regulator']['ansible_ssh_port'] | default(22) }}"
+    regulator_hostname: "{{ hostvars['regulator']['ansible_host'] | default('regulator') }}"
+
+  tasks:
+    - block:
+      - name: Fetch DATA files archive on bastion from source
+        command: |
+            scp -o StrictHostKeyChecking=no -P {{ src_host_port }} {{ hostvars[inventory_hostname].ansible_user }}@{{ src_hostname }}:{{ daily_archive_fullname }} {{ tmp_audit_archive_name }}
+        args:
+          creates: "{{ tmp_audit_archive_name }}"
+        delegate_to: "{{ groups['bastion'] | first }}"
+
+      - name: Push DATA files archive from bastion to regulator
+        command: |
+            scp -o StrictHostKeyChecking=no -P {{ regulator_host_port }} {{ tmp_audit_archive_name }} {{ hostvars['regulator'].ansible_user }}@{{ regulator_hostname }}:{{ final_audit_archive_fullname }}
+        delegate_to: "{{ groups['bastion'] | first }}"
+      when: audit_archive_name is defined and audit_target_path is defined
+
+      always:
+        - name: "Clean archive on bastion"
+          file:
+            path: "{{ tmp_audit_archive_name }}"
+            state: absent
+          delegate_to: "{{ groups['bastion'] | first }}"
+
+        - name: "Delete files older then 4 days"
+          command: |
+            find {{ tmp_root }} -mtime +4 -type f -exec rm {} \;
