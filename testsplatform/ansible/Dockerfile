@@ -7,8 +7,8 @@ RUN adduser --home /home/ansible --shell /bin/bash ansible -D
 
 USER ansible
 WORKDIR /home/ansible
-RUN mkdir -p -m 0700 ~/.ssh
+RUN mkdir -p -m 0700 ~/.ssh/
 COPY --chown=ansible id_rsa id_rsa.pub .ssh/
-RUN cat .ssh/id_rsa.pub > .ssh/authorized_keys
+RUN cp .ssh/id_rsa.pub .ssh/authorized_keys
 
 ENTRYPOINT ["ansible-playbook", "-e", "test_mode=true"]

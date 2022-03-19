@@ -1,23 +1,25 @@
 ARG VERSION
-FROM testplatform/ssh_ubuntu_16:${VERSION}
+ARG REGISTRY
+FROM ${REGISTRY}ssh_ubuntu_16:${VERSION}
 
-RUN adduser --home /home/usr1 --force-badname --disabled-password usr1 \
+ARG USER=usr1
+RUN adduser --home /home/${USER}/ --force-badname --disabled-password ${USER} \
     && mkdir /ftp/ \
-    && chown usr1: /ftp/
+    && chown ${USER}: /ftp/
 
-RUN mkdir -m 0700 /home/usr1/.ssh \
-    && cp /var/tmp/id_rsa.pub /home/usr1/.ssh \
-    && chown -R usr1: /home/usr1/.ssh
+WORKDIR /home/${USER}
+RUN mkdir -m 0700 .ssh/ \
+    && mv /var/tmp/id_rsa.pub .ssh/ \
+    && mv .ssh/id_rsa.pub .ssh/authorized_keys \
+    && chown -R ${USER}: .ssh/
 
-USER usr1
-WORKDIR /home/usr1
-RUN cat .ssh/id_rsa.pub > .ssh/authorized_keys
+USER ${USER}
 
 ARG TO_DATE
 ARG FROM_DATE
 ARG SCRIPT
 
-COPY --chown=usr1 ${SCRIPT} /tmp/datafilesGenerator.sh
+COPY --chown=${USER} ${SCRIPT} /tmp/datafilesGenerator.sh
 RUN chmod +x /tmp/datafilesGenerator.sh \
     && /tmp/datafilesGenerator.sh ${FROM_DATE} ${TO_DATE}
 

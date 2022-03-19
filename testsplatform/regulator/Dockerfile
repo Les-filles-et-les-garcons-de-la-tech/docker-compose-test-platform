@@ -1,16 +1,16 @@
 ARG VERSION
-FROM testplatform/ssh_ubuntu_18:${VERSION}
+ARG REGISTRY
+FROM ${REGISTRY}ssh_ubuntu_18:${VERSION}
 
-RUN adduser --force-badname --disabled-password regusr
+ARG USER=regusr
+RUN adduser --force-badname --disabled-password ${USER}
 RUN mkdir /TYPE2 /TYPE3 /TYPE1 \
-    && chown regusr: /TYPE2 /TYPE3 /TYPE1
+    && chown ${USER}: /TYPE2 /TYPE3 /TYPE1
 
-USER regusr
-WORKDIR /home/regusr
-RUN mkdir -p -m 0700 .ssh
-RUN cat /var/tmp/id_rsa.pub > .ssh/authorized_keys
+WORKDIR /home/${USER}/
+RUN mkdir -p -m 0700 .ssh/ \
+    && mv /var/tmp/id_rsa.pub .ssh/authorized_keys \
+    && chown -R ${USER}: .
 
-USER root
-RUN service ssh start
 EXPOSE 22
 CMD /usr/sbin/sshd -D

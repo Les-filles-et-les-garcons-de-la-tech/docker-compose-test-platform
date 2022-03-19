@@ -3,20 +3,22 @@ version: '2.4'
 
 services:
   first_bastion:
-    image: ${REGISTRY}/first_bastion:${CURRENT_VERSION}
+    image: ${REGISTRY}first_bastion:${CURRENT_VERSION}
     build:
       context: ../bastion
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
     networks:
       - external_network
       - tra_network
 
   second_bastion:
-    image: ${REGISTRY}/second_bastion:${CURRENT_VERSION}
+    image: ${REGISTRY}second_bastion:${CURRENT_VERSION}
     build:
       context: ../bastion
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
         USER: 'usr1'
         PORT: '22'
@@ -27,19 +29,21 @@ services:
       - tra_network
 
   regulator:
-    image: ${REGISTRY}/regulator:${STABLE_VERSION}
+    image: ${REGISTRY}regulator:${STABLE_VERSION}
     build:
       context: ../regulator
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
     networks:
       regulator_network:
 
   type1_provider1_src:
-    image: ${REGISTRY}/double_bastion/type1_provider1_src:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/type1_provider1_src:${CURRENT_VERSION}
     build:
       context: ssh_src_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
         TO_DATE: ${TO_DATE}
         FROM_DATE: ${FROM_DATE}
@@ -51,10 +55,11 @@ services:
           - type1_provider1_techno2_src
 
   type1_provider1_dst:
-    image: ${REGISTRY}/double_bastion/app_server:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/app_server:${CURRENT_VERSION}
     build:
       context: app_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
     networks:
       type1_network:
@@ -63,10 +68,11 @@ services:
           - type1_provider1_techno2_dst
 
   type2_provider1_src:
-    image: ${REGISTRY}/double_bastion/type2_provider1_src:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/type2_provider1_src:${CURRENT_VERSION}
     build:
       context: ssh_src_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
         TO_DATE: ${TO_DATE}
         FROM_DATE: ${FROM_DATE}
@@ -78,10 +84,11 @@ services:
           - type2_provider1_techno2_src
 
   type2_provider1_dst:
-    image: ${REGISTRY}/double_bastion/app_server:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/app_server:${CURRENT_VERSION}
     build:
       context: app_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
     networks:
       type2_network:
@@ -90,10 +97,11 @@ services:
           - type2_provider1_techno2_dst
 
   type2_provider2_src:
-    image: ${REGISTRY}/double_bastion/type2_provider2_src:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/type2_provider2_src:${CURRENT_VERSION}
     build:
       context: ssh_src_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
         TO_DATE: ${TO_DATE}
         FROM_DATE: ${FROM_DATE}
@@ -105,10 +113,11 @@ services:
           - type2_provider2_techno2_src
 
   type2_provider2_dst:
-    image: ${REGISTRY}/double_bastion/app_server:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/app_server:${CURRENT_VERSION}
     build:
       context: app_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
     networks:
       type2_network:
@@ -117,10 +126,11 @@ services:
           - type2_provider2_techno2_dst
 
   type1_provider2_src:
-    image: ${REGISTRY}/double_bastion/type1_provider2_src:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/type1_provider2_src:${CURRENT_VERSION}
     build:
       context: ssh_src_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
         TO_DATE: ${TO_DATE}
         FROM_DATE: ${FROM_DATE}
@@ -132,10 +142,11 @@ services:
           - type1_provider2_techno2_src
 
   type1_provider2_dst:
-    image: ${REGISTRY}/double_bastion/app_server:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/app_server:${CURRENT_VERSION}
     build:
       context: app_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
     networks:
       type1_network:
@@ -144,10 +155,11 @@ services:
           - type1_provider2_techno2_dst
 
   type3_provider1_src:
-    image: ${REGISTRY}/double_bastion/type3_provider1_src:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/type3_provider1_src:${CURRENT_VERSION}
     build:
       context: ssh_src_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
         TO_DATE: ${TO_DATE}
         FROM_DATE: ${FROM_DATE}
@@ -159,10 +171,11 @@ services:
           - type3_provider1_techno2_src
 
   type3_provider1_dst:
-    image: ${REGISTRY}/double_bastion/app_server:${CURRENT_VERSION}
+    image: ${REGISTRY}double_bastion/app_server:${CURRENT_VERSION}
     build:
       context: app_server/
       args:
+        REGISTRY: ${REGISTRY}
         VERSION: ${STABLE_VERSION}
     networks:
       type3_network:

@@ -1,11 +1,12 @@
 ARG VERSION
-FROM testplatform/ssh_ubuntu_18:${VERSION}
+ARG REGISTRY
+FROM ${REGISTRY}ssh_ubuntu_18:${VERSION}
 
 RUN adduser --force-badname --disabled-password user
 
-RUN mkdir -m 0700 /home/user/.ssh \
-    && cat /var/tmp/id_rsa.pub > /home/user/.ssh/authorized_keys \
-    && chown -R user: /home/user/.ssh
+RUN mkdir -m 0700 /home/user/.ssh/ \
+    && mv /var/tmp/id_rsa.pub /home/user/.ssh/authorized_keys \
+    && chown -R user: /home/user/.ssh/
 
 RUN mkdir -p /home/type2_provider1_techno1/flat_file \
         /home/type2_provider1_techno2/flat_file \

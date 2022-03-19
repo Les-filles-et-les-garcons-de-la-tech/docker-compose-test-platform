@@ -11,7 +11,7 @@ create_ssh_key:
   tags:
     - testplatform
   before_script:
-    - which ssh-keygen || (apt-get update -y && apt-get install -y openssh-client)
+    - which ssh-keygen &> /dev/null || (apt-get update -y && apt-get install -y openssh-client)
   script:
     - echo y | ssh-keygen -b 2048 -t rsa -q -P "" -f testsplatform/id_rsa
   artifacts:
@@ -29,7 +29,7 @@ build_ssh_server_image:
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
     - cp -u testsplatform/id_rsa* $IMAGE_PATH/
   script:
-    - docker build --build-arg VERSION=$VERSION -t $CI_REGISTRY_IMAGE/$IMAGE_NAME:$STABLE_VERSION $IMAGE_PATH
+    - docker build --build-arg VERSION=$VERSION --build-arg REGISTRY="$CI_REGISTRY_IMAGE/" -t $CI_REGISTRY_IMAGE/$IMAGE_NAME:$STABLE_VERSION $IMAGE_PATH
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:$STABLE_VERSION $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
     - docker push -a $CI_REGISTRY_IMAGE/$IMAGE_NAME
   parallel:
@@ -53,7 +53,7 @@ build_prerequisite_images:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
   script:
-    - docker build --build-arg VERSION=$STABLE_VERSION -t $CI_REGISTRY_IMAGE/$IMAGE_NAME:$STABLE_VERSION $IMAGE_PATH
+    - docker build --build-arg VERSION=$STABLE_VERSION --build-arg REGISTRY="$CI_REGISTRY_IMAGE/" -t $CI_REGISTRY_IMAGE/$IMAGE_NAME:$STABLE_VERSION $IMAGE_PATH
     - docker tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:$STABLE_VERSION $CI_REGISTRY_IMAGE/$IMAGE_NAME:latest
     - docker push -a $CI_REGISTRY_IMAGE/$IMAGE_NAME
   parallel:
@@ -73,7 +73,7 @@ build_images:
     - mkdir -p ~/.docker/cli-plugins/
     - docker compose version || (wget -q -O ~/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64 && chmod +x ~/.docker/cli-plugins/docker-compose)
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
-    - echo -e "STABLE_VERSION=$STABLE_VERSION\nCURRENT_VERSION=$CURRENT_VERSION\nREGISTRY=$CI_REGISTRY_IMAGE\nFROM_DATE=$(date '+%Y%m%d')\nTO_DATE=$(date '+%Y%m%d')" > testsplatform/$SERVER/.env
+    - echo -e "STABLE_VERSION=$STABLE_VERSION\nCURRENT_VERSION=$CURRENT_VERSION\nREGISTRY=$CI_REGISTRY_IMAGE/\nFROM_DATE=$(date '+%Y%m%d')\nTO_DATE=$(date '+%Y%m%d')" > testsplatform/$SERVER/.env
   script:
     - cd testsplatform/$SERVER/
     - docker compose build
@@ -90,7 +90,7 @@ package:
   tags:
     - testplatform
   before_script:
-    - which yq &> /dev/null || apt-get update -y && apt-get install -y wget && wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY} -O /usr/bin/yq && chmod +x /usr/bin/yq
+    - which yq &> /dev/null || (apt-get update -y && apt-get install -y wget && wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY} -O /usr/bin/yq && chmod +x /usr/bin/yq)
   script:
     - yq --version
     - bash ./prodconf.sh
@@ -109,12 +109,12 @@ test_server:
   tags:
     - testplatform-docker
   before_script:
-    - apt-get update && apt-get install -y tee
+    - which tee &> /dev/null || (apt-get update && apt-get install -y tee)
     - mkdir -p ~/.docker/cli-plugins/
     - docker compose version || (wget -q -O ~/.docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64 && chmod +x ~/.docker/cli-plugins/docker-compose)
     - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
     - docker pull $CI_REGISTRY_IMAGE/ansible:$STABLE_VERSION
-    - echo -e "STABLE_VERSION=$STABLE_VERSION\nCURRENT_VERSION=$CURRENT_VERSION\nREGISTRY=$CI_REGISTRY_IMAGE\nFROM_DATE=$(date '+%Y%m%d')\nTO_DATE=$(date '+%Y%m%d')" > testsplatform/$SERVER/.env
+    - echo -e "STABLE_VERSION=$STABLE_VERSION\nCURRENT_VERSION=$CURRENT_VERSION\nREGISTRY=$CI_REGISTRY_IMAGE/\nFROM_DATE=$(date '+%Y%m%d')\nTO_DATE=$(date '+%Y%m%d')" > testsplatform/$SERVER/.env
   script:
     - docker compose --project-directory "testsplatform/$SERVER/" up -d --wait
     - docker run --network=${SERVER}_external_network -v $PWD:/playbooks/ $CI_REGISTRY_IMAGE/ansible:$STABLE_VERSION -i /playbooks/${SERVER}/${SERVER}.yml -e filter_hour=${PROCESS_HOUR} /playbooks/get_files_${SERVER}.yml | tee get_files_${SERVER}_${PROCESS_HOUR}.log

@@ -20,8 +20,8 @@ Build & run the mock infra, see [setup_infra.sh](testsplatform/simple_bastion/se
 SERVER=simple_bastion
 ./testsplatform/setup_infra.sh ${SERVER}
 . ./testsplatform/.dev.env
-docker run --rm --name ansible_$SERVER --network=${SERVER}_external_network -v $PWD:/playbooks $REGISTRY/ansible:$STABLE_VERSION -i /playbooks/$SERVER/$SERVER.yml /playbooks/get_files_$SERVER.yml
-docker run --rm --name ansible_$SERVER --network=${SERVER}_external_network -v $PWD:/playbooks/ $REGISTRY/ansible:$STABLE_VERSION -i /playbooks/$SERVER/$SERVER.yml /playbooks/deploy_files.yml
+docker run --rm --name ansible_$SERVER --network=${SERVER}_external_network -v $PWD:/playbooks ${REGISTRY}ansible:$STABLE_VERSION -i /playbooks/$SERVER/$SERVER.yml /playbooks/get_files_$SERVER.yml
+docker run --rm --name ansible_$SERVER --network=${SERVER}_external_network -v $PWD:/playbooks/ ${REGISTRY}ansible:$STABLE_VERSION -i /playbooks/$SERVER/$SERVER.yml /playbooks/deploy_files.yml
 ```
 Optionally launch only Cellcom operator for a specific day/hour:
 ```bash
@@ -30,8 +30,8 @@ PROCESS_DAY=20211213
 PROCESS_HOUR=11
 TYPE=type3
 . ./testsplatform/.dev.env
-docker run --rm --name ansible_$SERVER --network=${SERVER}_external_network -v $PWD:/playbooks $REGISTRY/ansible:$STABLE_VERSION -i /playbooks/$SERVER/$SERVER.yml -e "filter_day=$PROCESS_DAY" -e filter_hour=$PROCESS_HOUR -l $TYPE /playbooks/get_files_$SERVER.yml
-docker run --rm --name ansible_$SERVER --network=${SERVER}_external_network -v $PWD:/playbooks/ $REGISTRY/ansible:$STABLE_VERSION -i /playbooks/$SERVER/$SERVER.yml -e "filter_day=$PROCESS_DAY" -e filter_hour=$PROCESS_HOUR -l $TYPE /playbooks/deploy_files.yml
+docker run --rm --name ansible_$SERVER --network=${SERVER}_external_network -v $PWD:/playbooks ${REGISTRY}ansible:$STABLE_VERSION -i /playbooks/$SERVER/$SERVER.yml -e "filter_day=$PROCESS_DAY" -e filter_hour=$PROCESS_HOUR -l $TYPE /playbooks/get_files_$SERVER.yml
+docker run --rm --name ansible_$SERVER --network=${SERVER}_external_network -v $PWD:/playbooks/ ${REGISTRY}ansible:$STABLE_VERSION -i /playbooks/$SERVER/$SERVER.yml -e "filter_day=$PROCESS_DAY" -e filter_hour=$PROCESS_HOUR -l $TYPE /playbooks/deploy_files.yml
 ```
 
 # Next Steps
